@@ -18,5 +18,5 @@ while True:
             except:
                 break
     except:
-        time.sleep(25)
+        time.sleep(300)
         continue
