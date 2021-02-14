@@ -1,7 +1,7 @@
 import socket
 
 sock = socket.socket()
-sock.bind(('', 8450))
+sock.bind(('', 25566))
 sock.listen(1)
 conn, addr = sock.accept()
 
