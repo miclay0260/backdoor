@@ -1,7 +1,7 @@
 import socket
 import os
 import time
-host = "192.168.1.47"
+host = "192.168.1.34"
 while True:
     try:
         sock = socket.socket()
