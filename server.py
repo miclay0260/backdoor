@@ -10,6 +10,7 @@ while True:
     try:
         comm = input("-> ")
         if comm == "refuse":
+            conn.send(comm.encode())
             conn.close()
         else:
              conn.send(comm.encode())  # отправляем команду
