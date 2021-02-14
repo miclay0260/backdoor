@@ -1,10 +1,9 @@
 import socket
 
 sock = socket.socket()
-sock.bind(('', 8080))
+sock.bind((" ", 9494))
 sock.listen(3)
 conn, addr = sock.accept()
-
 print ('connected:', addr)
 while True:
     try:

