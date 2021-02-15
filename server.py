@@ -9,8 +9,8 @@ while True:
     try:
         comm = input("-> ")
         if comm != "refuse":
-            conn.send(comm.encode())  # отправляем команду
-            data = conn.recv(1024).decode()  # получаем результат
+            conn.send(comm.encode())  
+            data = conn.recv(1024).decode()  
             print (data)
         else:
             print ("Refused")
@@ -18,5 +18,5 @@ while True:
             exit()
     except:
          break
-print("Connection refused")  # в случае, если соединение разорванно
+print("Connection refused")  
 conn.close()
