@@ -3,7 +3,7 @@ import os
 import time
 
 sock = socket.socket()
-sock.connect(("192.168.1.47", 9898))
+sock.connect(("192.168.1.47", 10000))
 
 def recvfile():
     i = 1
@@ -39,3 +39,4 @@ def main():
         except:
             time.sleep(10)
             continue
+main()
