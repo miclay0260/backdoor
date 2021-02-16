@@ -1,7 +1,7 @@
 import socket
 
 sc = socket.socket()
-sc.bind(("", 10000))
+sc.bind(("", 1440))
 sc.listen(3)
 conn, addr = sc.accept()
 print ('connected:', addr)
