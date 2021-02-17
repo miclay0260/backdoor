@@ -3,7 +3,6 @@ import sys
 import os
 import tqdm
 
-SEPARATOR = "<SEPARATOR>"
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 HOST = ''
 
@@ -40,30 +39,6 @@ def main():
         if cmd == 'exitrat':
             s.close()
             sys.exit(0)
-
-        # Function of downloading files / Функция загрузки файлов
-        elif cmd == "sendfile":
-            filename = input("[FILE] -> ")
-            # get the file size
-            filesize = os.path.getsize(filename)
-
-            # send the filename and filesize
-            conn.send(f"{filename}{SEPARATOR}{filesize}".encode())
-
-            # start sending the file
-            progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
-            with open(filename, "rb") as f:
-                while True:
-                    # read the bytes from the file
-                    bytes_read = f.read(1024)
-                    if not bytes_read:
-                        # file transmitting is done
-                        break
-                    # we use sendall to assure transimission in
-                    # busy networks
-                    conn.sendall(bytes_read)
-                    # update the progress bar
-                    progress.update(len(bytes_read))
 
         # Variable with client answer / Переменная с ответом от сервера
         data = conn.recv(4096)
